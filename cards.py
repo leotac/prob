@@ -1,5 +1,6 @@
 # coding: utf-8
 import random
+random.seed(2)
 
 class deck:
    def __init__(self, N=40, face=True):
@@ -70,7 +71,7 @@ class deck:
       try:
          return self.suit(i) + " " + str(self.value(i))# + " ("+str(i)+")"
       except:
-         return "Nada"
+         return '---'
 
 
 #TODO generator
@@ -131,35 +132,80 @@ def pyramid(depth):
       else:
          return False
 
+   # Print the pyramid
+   def printPyramid():
+      for l in xrange(depth):
+         print l,'  '*((depth-l-1)),
+         print '[', 
+         for i,x in enumerate(levels[l]):
+            if isfree(l,i):
+               print d.pretty(x),
+            else:
+               print '???', 
+         print ']' 
+
    # Play!
    found = True 
    while found == True:
       found = False
+      print "---------------------"
       print "Deck:", 
       d.display()
-      for l in xrange(depth):
-         print levels[l]
 
-      for l in xrange(depth):
+      printPyramid()
+
+      # Bottom up, check for open cards in the pyramid
+      for l in xrange(depth-1,-1,-1):
          for i,x in enumerate(levels[l]):
             if x is None or not isfree(l,i):
                continue
-            print "Open:",d.pretty(x) #, l, i, x
+            found = False
+            print "Open:",d.pretty(x), (l,i)
             value = d.value(levels[l][i])
             if value == 10:
                found = True
                levels[l][i] = None
-               continue 
+               print "Removed:", d.pretty(x)
+               continue
+            
+            for ll in xrange(depth):
+               for ii,xx in enumerate(levels[ll]):
+                  #print d.pretty(xx),
+                  if xx is not None and (ll,ii) != (l,i) and isfree(ll,ii) and d.value(levels[ll][ii]) == (10 - value):
+                     found = True
+                     levels[l][i] = None
+                     levels[ll][ii] = None
+                     print "Removed:", d.pretty(xx)
+                     print "Removed:", d.pretty(x)
+                     break
+               if found == True:
+                  break
+      print ''
+      printPyramid()
+
+      # When no matching open cards exist, try to scan the deck 
+      for l in xrange(depth):
+         for i,x in enumerate(levels[l]):
+            if x is None or not isfree(l,i):
+               continue
+            print "Open:",d.pretty(x), (l, i)
+            value = d.value(levels[l][i])
+            
             card = d.extractByValue(10 - value)
             if card is not None:
                print "Extracted:",d.pretty(card)
+               print "Removed:", d.pretty(x)
                found = True 
                levels[l][i] = None
+               break
+         if found == True:
+            break
 
    for l in xrange(depth):
       for x in levels[l]:
             if x is not None:
+               print "No"
                return False
-
+   print "Yes"
    return True
 
