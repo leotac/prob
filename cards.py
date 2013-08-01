@@ -1,11 +1,10 @@
-# coding: utf-8
 import random
 random.seed(2)
 
 class deck:
    def __init__(self, N=40, face=True):
       self.N = N
-      self.cards = range(1, self.N + 1) #40 cards
+      self.cards = range(1, self.N + 1)
       assert N >= 4, "There must be at least one card per suit"
       self.degree = self.N/4
       self.face = face 
@@ -42,7 +41,7 @@ class deck:
       self.shuffle()
 
    def suit(self, i):
-      suits = u'♠♣♥♦'
+      suits = u'\u2660\u2663\u2665\u2666'
       s = (i-1)/self.degree
       try:
          return suits[s]
