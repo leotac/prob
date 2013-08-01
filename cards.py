@@ -17,7 +17,14 @@ class deck:
          return self.cards.pop()
       except:
          return None
-   
+
+   def extractByValue(self, v):
+      for i in self.cards:
+         if self.value(i) == v:
+            self.cards.remove(i)
+            return i
+      return None
+
    def merge(self, d):
       assert d.degree == self.degree
       try:
@@ -54,24 +61,27 @@ class deck:
             return 'K'
       return value
 
-
    def display(self):
       for i in self.cards:
-         print self.pretty(i)
+         print self.pretty(i),
+      print ''
 
    def pretty(self, i):
-      return self.suit(i) + " " + str(self.value(i)) + " ("+str(i)+")"
+      try:
+         return self.suit(i) + " " + str(self.value(i))# + " ("+str(i)+")"
+      except:
+         return "Nada"
 
 
 #TODO generator
 
-def runTest(game, N):
+def runTest(N,game, *args):
    success = 0
    chunk = N/10
    for i in xrange(N):
       if i%chunk == 0:
          print "."
-      if game() == True:
+      if game(*args) == True:
          success += 1
    print success, 100*float(success)/N
 
@@ -93,29 +103,63 @@ def play123(verbose=False):
    # Success!
    return True
 
-def pyramid():
+def pyramid(depth):
    N = 40
-   depth = 4
-   assert 2**(depth) < N
-   d = deck(N, face=True)
+   assert depth*(depth+1)/2 < N
+   
+   d = deck(N, face=False)
    d.shuffle()
 
-   #Building phase
+   # Building phase
 
    levels = []
    hidden = []
 
    for l in xrange(depth):
       levels.append([])
-      size = 2**l
+      size = l+1
       for x in xrange(size):
          levels[l].append(d.pop())
       print levels[l]
 
+   # Check if the card is free
    def isfree(lev,index):
-      if levels[lev+1][2*index] == None and levels[lev+1][2*index + 1] == None:
+      if lev == depth-1:
+         return True
+      if levels[lev+1][index] == None and levels[lev+1][index + 1] == None:
          return True
       else:
          return False
 
+   # Play!
+   found = True 
+   while found == True:
+      found = False
+      print "Deck:", 
+      d.display()
+      for l in xrange(depth):
+         print levels[l]
+
+      for l in xrange(depth):
+         for i,x in enumerate(levels[l]):
+            if x is None or not isfree(l,i):
+               continue
+            print "Open:",d.pretty(x) #, l, i, x
+            value = d.value(levels[l][i])
+            if value == 10:
+               found = True
+               levels[l][i] = None
+               continue 
+            card = d.extractByValue(10 - value)
+            if card is not None:
+               print "Extracted:",d.pretty(card)
+               found = True 
+               levels[l][i] = None
+
+   for l in xrange(depth):
+      for x in levels[l]:
+            if x is not None:
+               return False
+
+   return True
 
