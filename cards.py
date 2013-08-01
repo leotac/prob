@@ -20,7 +20,7 @@ class deck:
 
    def extractByValue(self, v):
       for i in self.cards:
-         if self.value(i) == v:
+         if self.numericValue(i) == v:
             self.cards.remove(i)
             return i
       return None
@@ -47,6 +47,10 @@ class deck:
          return suits[s]
       except:
          return '*'
+
+   def numericValue(self,i):
+      return (i-1)%self.degree + 1
+
 
    def value(self, i):
       value = (i-1)%self.degree + 1
@@ -88,7 +92,7 @@ def runTest(N,game, *args):
 
 def play123(verbose=False):
 
-   d = deck(40, face=False)
+   d = deck(40)
    d.shuffle()
    card = d.pop()
    i = 0
@@ -96,7 +100,7 @@ def play123(verbose=False):
       i += 1
       if verbose:
          print i, d.pretty(card) 
-      if d.value(card) == i%3:
+      if d.numericValue(card) == i%3:
          return False
       card = d.pop()
 
@@ -107,7 +111,7 @@ def pyramid(depth):
    N = 40
    assert depth*(depth+1)/2 < N
    
-   d = deck(N, face=False)
+   d = deck(N)
    d.shuffle()
 
    # Building phase
@@ -160,7 +164,7 @@ def pyramid(depth):
                continue
             found = False
             print "Open:",d.pretty(x), (l,i)
-            value = d.value(levels[l][i])
+            value = d.numericValue(levels[l][i])
             if value == 10:
                found = True
                levels[l][i] = None
@@ -170,7 +174,7 @@ def pyramid(depth):
             for ll in xrange(depth):
                for ii,xx in enumerate(levels[ll]):
                   #print d.pretty(xx),
-                  if xx is not None and (ll,ii) != (l,i) and isfree(ll,ii) and d.value(levels[ll][ii]) == (10 - value):
+                  if xx is not None and (ll,ii) != (l,i) and isfree(ll,ii) and d.numericValue(levels[ll][ii]) == (10 - value):
                      found = True
                      levels[l][i] = None
                      levels[ll][ii] = None
@@ -182,13 +186,16 @@ def pyramid(depth):
       print ''
       printPyramid()
 
+      #??
+      # if found == False
+      
       # When no matching open cards exist, try to scan the deck 
       for l in xrange(depth):
          for i,x in enumerate(levels[l]):
             if x is None or not isfree(l,i):
                continue
             print "Open:",d.pretty(x), (l, i)
-            value = d.value(levels[l][i])
+            value = d.numericValue(levels[l][i])
             
             card = d.extractByValue(10 - value)
             if card is not None:
